@@ -1,0 +1,19 @@
+CPP STANDARTS
+
+1. INCLUDES
+	1. Standart libraries
+	2. ESP-IDF headers
+	3. Application headers
+2. GLOBAL VARIABLES
+	1. Use "static" if the variable is only used in the same file
+
+3. GLOBAL NETIF object for WIFI station and Access Point
+
+4. Private/Static functions section (witch is mean to be used in the same file)
+	1. each function shall include a comment with the description of the function, it's parameters and return description.
+	2. The code style says to use "static" to specify a fuction that is static (code_styling_static)
+
+5. Public functions
+	1. A description is not necessary as its is included  in the header file
+
+
