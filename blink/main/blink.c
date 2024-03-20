@@ -44,7 +44,7 @@ static void blink_led_task(void* arg)
     while (1)
     {
         blink_led();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
     }
 }
 // Public functions

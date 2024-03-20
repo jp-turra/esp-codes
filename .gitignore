@@ -1,4 +1,4 @@
 .vscode
 .devcontainer
-blink/components/**
-blink/build
+
+**/build
