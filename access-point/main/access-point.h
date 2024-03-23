@@ -11,14 +11,18 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "freertos/timers.h"
 
 #include "hal/gpio_types.h"
 
 #include "driver/gpio.h"
-#include "driver/gptimer.h"
-#include "driver/timer.h"
+// #include "driver/gptimer.h"
+// #include "driver/timer.h"
 
 #include "esp_log.h"
+
+#define TIMER_ID 1
+#define TAG "access-point"
 
 // Global application variables
 static enum e_led_state
@@ -34,11 +38,6 @@ static gpio_config_t g_led_config;
 static uint8_t g_led_config_state = 0;
 static TickType_t g_delay_ms = 100 / portTICK_PERIOD_MS; // 100ms
 static TickType_t g_change_led_state_ms = 2000 / portTICK_PERIOD_MS; // 2 s
-static TickType_t g_last_tick_ms = portTICK_PERIOD_MS;
-
-typedef struct {
-    uint32_t event_count;
-} queue_element_t;
 
 // Global NETIF variables
 
