@@ -28,7 +28,7 @@ if (-not $branch_list) {
 }
 
 # Check if there is any uncommitted changes
-if ((git status --porcelain) -ne "") {
+if ("$(git status --porcelain)" -ne "") {
     Write-Output "There are uncommitted changes. Stash them before pulling from 'dev'"
     exit 0
 }
