@@ -1,6 +1,13 @@
 # Set to exit on error
 $ErrorActionPreference = "Stop"
 
+function check_return_code {
+    if ("$LASTEXITCODE" -eq "1") {
+        Write-Output "Error on $args[0]"
+        exit 1
+    }
+}
+
 # Get feature_name argument
 $feature_name = $args[0]
 $script_dir = $PSScriptRoot
@@ -31,6 +38,7 @@ if (-not $branch_list) {
 Write-Output "git checkout -b $feature_name dev"
 Start-Sleep -s 1
 git checkout -b $feature_name dev
+check_return_code "git checkout -b $feature_name dev"
 
 # Check if there is any uncommitted changes
 if ((git status --porcelain) -ne "") {
@@ -41,5 +49,6 @@ if ((git status --porcelain) -ne "") {
 Write-Output "git push -u origin $feature_name"
 Start-Sleep -s 1
 git push -u origin $feature_name
+check_return_code "git push -u origin $feature_name"
 
 Write-Output "Starting feature $feature_name DONE!"
