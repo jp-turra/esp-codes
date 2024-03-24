@@ -22,7 +22,7 @@ if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
 }
 
 # Check if branch "dev" exists
-$branch_list = $(git branch -a --no-color | Select-String -Pattern "dev")
+$branch_list = $(git branch -a --no-color | Select-String -Pattern "dev$")
 if (-not $branch_list) {
     Write-Output "Branch 'dev' not found. Please create it and try again."
     exit 1

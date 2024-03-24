@@ -3,9 +3,14 @@ $ErrorActionPreference = "Stop"
 
 $feature_name = $args[0]
 $script_dir = $PSScriptRoot
+$check_feature_script = "$script_dir\check_feature_name.ps1"
+
+# Call check_feature_script with argument feature_name and get its return code
+& $check_feature_script $feature_name
 
 # Call check_feature_name.ps1 and check if return code is 1
-if ("$script_dir\check_feature_name.ps1 $feature_name") {
+if ("$LASTEXITCODE" -eq "1") {
+    Write-Output "Invalid feature name. Please provide a valid feature name."
     exit 1
 }
 
@@ -16,7 +21,8 @@ if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
 }
 
 # Check if branch "dev" exists
-if (-not (git show-ref --verify --quiet refs/heads/dev)) {
+$branch_list = $(git branch -a --no-color | Select-String -Pattern "dev$")
+if (-not $branch_list) {
     Write-Output "Branch 'dev' not found. Please create it and try again."
     exit 1
 }
