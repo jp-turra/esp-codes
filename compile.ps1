@@ -3,6 +3,14 @@ $port = $args[1]
 
 $script_dir = $PSScriptRoot
 
+# Function to check if return code is 1
+function check_return_code {
+    if ("$LASTEXITCODE" -eq "1") {
+        Write-Output "Error on $args[0]"
+        exit 1
+    }
+}
+
 # Check if --help or -h argument is provided
 if ($args -contains "--help" -or $args -contains "-h") 
 {
@@ -49,6 +57,8 @@ if (-not (Test-Path "$script_dir\$app_name"))
 
 # Build the application
 & idf.py build -C $script_dir/$app_name
+check_return_code
+
 
 # Upload the application
 if ($port) 
@@ -61,4 +71,5 @@ if ($port)
     
     Start-Sleep -s 5
     & idf.py -p $port -C $script_dir/$app_name flash
+    check_return_code
 }
