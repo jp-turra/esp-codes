@@ -65,11 +65,11 @@ if ($port)
 {
     Write-Output "****************************************************"
     Write-Output ""
-    Write-Output "Uploading $app_name to $port in 5 seconds..."
+    Write-Output "Uploading $app_name to $port in 2 seconds..."
     Write-Output ""
     Write-Output "****************************************************"
     
-    Start-Sleep -s 5
+    Start-Sleep -s 2
     & idf.py -p $port -C $script_dir/$app_name flash
     check_return_code
 }
