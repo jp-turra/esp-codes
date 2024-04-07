@@ -22,12 +22,12 @@ static float delta_duty = 0;
 */
 static void constrain_angle(float *angle)
 {
-    if (*angle > SG_90_MAX_ANGLE)
+    if (*angle > SG_90_MAX_ANGLE || *angle < SG_90_MIN_ANGLE * 2)
     {   
         ESP_LOGW(TAG, "Angle too big: %.2f. Constraining to max allowed value: %d", *angle, SG_90_MAX_ANGLE);
-        *angle = SG_90_MAX_ANGLE;
+        *angle = *angle > SG_90_MAX_ANGLE ? SG_90_MAX_ANGLE : SG_90_MIN_ANGLE;
     }
-
+    
     return;
 }
 
@@ -73,7 +73,7 @@ esp_err_t servo_motor_set_angle(servo_motor_t *servo_motor, float angle)
 
     uint32_t duty = (uint32_t) ((angle / (float) SG_90_MAX_ANGLE * delta_duty) + min_duty);
     
-    ESP_LOGI(TAG, "Angle: %.2f, Duty: %li", angle, duty);
+    // ESP_LOGI(TAG, "Angle: %.2f, Duty: %li", angle, duty);
 
     // RETURN_ON_ERROR(ledc_set_duty_and_update(LEDC_LOW_SPEED_MODE, servo_motor->channel, duty, -1));
     RETURN_ON_ERROR(ledc_set_duty(LEDC_LOW_SPEED_MODE, servo_motor->channel, duty));

@@ -12,7 +12,9 @@
 
 #include "esp_err.h"
 
-#define SG_90_MAX_ANGLE 180
+#define SG_90_MAX_ANGLE 225
+// TODO: Add logic for this
+#define SG_90_MIN_ANGLE -180
 #define SG_90_FREQ_HZ 50
 // #define SG_90_FREQ_MS 0.002
 
@@ -20,7 +22,7 @@
 // #define SG_90_180_DEG_TIME_MS 2
 
 #define SG_90_ANGLE_0_DEG_PCT 0.05f
-#define SG_90_ANGLE_180_DEG_PCT 0.1f
+#define SG_90_ANGLE_180_DEG_PCT 0.10f // 12,77 max
 
 typedef struct servo_motor {
     gpio_num_t pin;
