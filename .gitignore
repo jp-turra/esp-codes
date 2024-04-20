@@ -2,3 +2,5 @@
 .devcontainer
 
 **/build
+
+components/VL53L0X_1.0.4/
