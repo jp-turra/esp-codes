@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <math.h>
 
 // ESP-IDF Libs
 #include "freertos/FreeRTOS.h"
@@ -14,35 +15,43 @@
 // Custom Libs
 #include "l298n.h"
 
+#define L298N_RETURN_ON_ERROR(err) if (err != L298N_OK) { return err; }
 #define RETURN_ON_ERROR(err, ret_code) if (err != ESP_OK) { return ret_code; }
 
 // static const char *TAG = "l298n";
 
-l298n_error_t configure_output_pin(gpio_num_t pin, bool configure_pwm, ledc_timer_t timer_num, ledc_channel_t channel_num, uint32_t *max_pwm_duty)
+l298n_error_t configure_output_pin(gpio_num_t pin, bool configure_pwm, ledc_timer_t timer_num, ledc_channel_t channel_num, float *max_pwm_duty)
 {
-    esp_err_t err;
+    if (pin == GPIO_NUM_NC)
+    {
+        return L298N_OK;
+    }
+    // esp_err_t err;
     RETURN_ON_ERROR(gpio_reset_pin(pin), L298N_CONFIG_PIN_ERR);
     RETURN_ON_ERROR(gpio_set_direction(pin, GPIO_MODE_OUTPUT), L298N_CONFIG_PIN_ERR);
-    RETURN_ON_ERROR(gpio_set_intr_type(pin, GPIO_INTR_DISABLE), L298N_CONFIG_PIN_ERR);
-    RETURN_ON_ERROR(gpio_set_pull_mode(pin, GPIO_PULLDOWN_ONLY), L298N_CONFIG_PIN_ERR);
+    // RETURN_ON_ERROR(gpio_set_intr_type(pin, GPIO_INTR_DISABLE), L298N_CONFIG_PIN_ERR);
+    // RETURN_ON_ERROR(gpio_set_pull_mode(pin, GPIO_PULLDOWN_ONLY), L298N_CONFIG_PIN_ERR);
     RETURN_ON_ERROR(gpio_set_level(pin, 0), L298N_CONFIG_PIN_ERR);
 
     if (configure_pwm)
     {   
-        *max_pwm_duty = ledc_find_suitable_duty_resolution(LEDC_REF_TICK, L298N_PWM_TIMER_FREQ_HZ);
-        if (*max_pwm_duty == 0)
-        {
-            return L298N_CONFIG_PWM_ERR;
-        }
+        // *max_pwm_duty = ledc_find_suitable_duty_resolution(LEDC_REF_TICK, L298N_PWM_TIMER_FREQ_HZ);
+        
+        // ESP_LOGI(TAG, "MAX Duty resolution: %lu", *max_pwm_duty);
+        // if (*max_pwm_duty == 0)
+        // {
+        //     return L298N_CONFIG_PWM_ERR;
+        // }
         // Configuring timer
         ledc_timer_config_t ledc_timer = {
             .speed_mode = LEDC_HIGH_SPEED_MODE,
             .timer_num = timer_num,
             .freq_hz = L298N_PWM_TIMER_FREQ_HZ,
-            .duty_resolution = *max_pwm_duty,
+            .duty_resolution = LEDC_TIMER_5_BIT,
             .clk_cfg = LEDC_REF_TICK
         };
         RETURN_ON_ERROR(ledc_timer_config(&ledc_timer), L298N_CONFIG_PWM_ERR);
+        *max_pwm_duty = pow(2, LEDC_TIMER_5_BIT) - 1;
 
         // Configuring channel
         ledc_channel_config_t ledc_channel = {
@@ -60,13 +69,13 @@ l298n_error_t configure_output_pin(gpio_num_t pin, bool configure_pwm, ledc_time
 
 l298n_error_t l298n_init(l298n_t *dev)
 {
-    RETURN_ON_ERROR(-1, configure_output_pin(dev->IN1, false, 0, 0, NULL));
-    RETURN_ON_ERROR(-1, configure_output_pin(dev->IN2, false, 0, 0, NULL));
-    RETURN_ON_ERROR(-1, configure_output_pin(dev->IN3, false, 0, 0, NULL));
-    RETURN_ON_ERROR(-1, configure_output_pin(dev->IN4, false, 0, 0, NULL));
+    L298N_RETURN_ON_ERROR(configure_output_pin(dev->IN1, false, 0, 0, NULL));
+    L298N_RETURN_ON_ERROR(configure_output_pin(dev->IN2, false, 0, 0, NULL));
+    L298N_RETURN_ON_ERROR(configure_output_pin(dev->IN3, false, 0, 0, NULL));
+    L298N_RETURN_ON_ERROR(configure_output_pin(dev->IN4, false, 0, 0, NULL));
 
-    RETURN_ON_ERROR(-1, configure_output_pin(dev->ENA, true, LEDC_TIMER_0, LEDC_CHANNEL_0, &dev->max_pwm_duty));
-    RETURN_ON_ERROR(-1, configure_output_pin(dev->ENB, true, LEDC_TIMER_1, LEDC_CHANNEL_1, &dev->max_pwm_duty));
+    L298N_RETURN_ON_ERROR(configure_output_pin(dev->ENA, true, LEDC_TIMER_0, LEDC_CHANNEL_0, &dev->max_pwm_duty));
+    L298N_RETURN_ON_ERROR(configure_output_pin(dev->ENB, true, LEDC_TIMER_1, LEDC_CHANNEL_1, &dev->max_pwm_duty));
 
     return L298N_OK;
 }
@@ -93,4 +102,6 @@ l298n_error_t l298n_move(l298n_t *dev, l298n_side_e side, l298n_direction_t dire
 
     RETURN_ON_ERROR(ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0), L298N_SET_MOVE_ERR);
     RETURN_ON_ERROR(ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1), L298N_SET_MOVE_ERR);
+
+    return L298N_OK;
 }

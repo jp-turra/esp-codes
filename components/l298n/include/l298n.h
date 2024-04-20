@@ -49,7 +49,7 @@ typedef struct l298n {
     l298n_direction_t ENA_direction;
     l298n_direction_t ENB_direction;
 
-    uint32_t max_pwm_duty;
+    float max_pwm_duty;
 } l298n_t;
 
 /**

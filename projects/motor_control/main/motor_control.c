@@ -8,17 +8,20 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "esp_log.h"
+#include "esp_console.h"
+
 // Custom Libs
 #include "l298n.h"
 
 l298n_t motor_driver = {
-    .IN1 = GPIO_NUM_10,
-    .IN2 = GPIO_NUM_11,
-    .IN3 = GPIO_NUM_12,
-    .IN4 = GPIO_NUM_13,
-    .ENA = GPIO_NUM_20,
+    .IN1 = GPIO_NUM_32,
+    .IN3 = GPIO_NUM_33,
+    .ENA = GPIO_NUM_25,
     .ENA_pwm = 0,
-    .ENB = GPIO_NUM_21,
+    .IN2 = GPIO_NUM_NC,
+    .IN4 = GPIO_NUM_NC,
+    .ENB = GPIO_NUM_NC,
     .ENB_pwm = 0,
     .ENA_direction = L298N_FORWARD,
     .ENB_direction = L298N_FORWARD,
@@ -39,18 +42,25 @@ void motor_control_task(void *pvParameters)
         vTaskDelay(5000 / portTICK_PERIOD_MS);
         return;
     }
+
+    int16_t pwm = 255;
     
     for(;;)
     {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         ESP_LOGI(TAG, "Forwards");
-        l298n_move(&motor_driver, L298N_LEFT_SIDE, L298N_FORWARD, 255);
-        l298n_move(&motor_driver, L298N_RIGHT_SIDE, L298N_FORWARD, 255);
+        l298n_move(&motor_driver, L298N_LEFT_SIDE, L298N_FORWARD, pwm);
+        // l298n_move(&motor_driver, L298N_RIGHT_SIDE, L298N_FORWARD, pwm);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        ESP_LOGI(TAG, "Backwards");
-        l298n_move(&motor_driver, L298N_LEFT_SIDE, L298N_BACKWARD, 255);
-        l298n_move(&motor_driver, L298N_RIGHT_SIDE, L298N_BACKWARD, 255);
+        ESP_LOGI(TAG, "STOP");
+        l298n_move(&motor_driver, L298N_LEFT_SIDE, L298N_FORWARD, 0);
+        // l298n_move(&motor_driver, L298N_RIGHT_SIDE, L298N_FORWARD, 0);
     }
+}
+
+void set_pwm(float pwm)
+{
+    l298n_move(&motor_driver, L298N_LEFT_SIDE, pwm > 0 ? L298N_FORWARD : L298N_BACKWARD, pwm);
 }
 
 void app_main(void)
